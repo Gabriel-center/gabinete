@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculadora de Gabinetes LED por Porta</title>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-S7GNEVK5S3"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-S7GNEVK5S3');
+    </script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
@@ -441,7 +452,7 @@
             </section>
             
             <div class="download-controls" id="downloadControlsContainer" style="display:none;">
-                <input type="text" id="customCardText" placeholder="Texto do Título (ex: Cliente/Gabine P3)">
+                <input type="text" id="customCardText" placeholder="Texto do Título (ex: Evento/OS)">
                 <button id="downloadBtn">Baixar Card</button>
             </div>
 
@@ -666,7 +677,7 @@
         });
 
         downloadBtn.addEventListener('click', () => {
-            const customText = customCardTextInput.value.trim() || "Resumo"; // Default text if input is empty
+            const customText = customCardTextInput.value.trim() || "Resumo";
             const calculatedData = JSON.parse(downloadBtn.dataset.calculatedData || "{}");
 
             if (!calculatedData.pixelWidth) {
