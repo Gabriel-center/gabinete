@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Gabinetes LED por Porta</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --bg-main: #000a66;
+            --bg-card: #FFFFFF;
+            --accent-color: #FFA500;
+            --text-color-dark: #333333;
+            --text-color-light: #f0f0f0;
+            --border-color: #CCCCCC;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --button-text-color: #FFFFFF;
+            --error-color: #D8000C;
+            --label-color: #555555;
+            --input-bg: #f8f9fa;
+            --watermark-color: #bdc3c7;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-color-dark);
+            line-height: 1.6;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 750px;
+            margin-bottom: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--bg-card);
+        }
+
+        header h1 {
+            color: var(--accent-color);
+            margin-bottom: 5px;
+        }
+        
+        .tagline {
+            font-size: 1.1em;
+            color: var(--border-color);
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 5px 15px var(--shadow);
+            margin-bottom: 25px;
+        }
+
+        .input-section h2 {
+            color: var(--bg-main);
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .form-group label {
+            flex-basis: 100%;
+            margin-bottom: 5px;
+            color: var(--label-color);
+            font-weight: bold;
+        }
+        
+        .form-group input[type="number"],
+        .form-group select,
+        #customCardText {
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 16px;
+            background-color: var(--input-bg);
+        }
+
+        .form-group input[type="number"] {
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+
+        .form-group select {
+            min-width: 70px;
+        }
+        
+        @media (min-width: 500px) {
+            .form-group label {
+                flex-basis: 200px;
+                margin-bottom: 0;
+                margin-right: 10px;
+            }
+             .form-group input[type="number"] {
+                width: auto;
+            }
+        }
+        
+        .download-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: stretch;
+            margin-top: 15px;
+            margin-bottom: 20px;
+        }
+        #customCardText {
+            width: 100%;
+            font-size: 15px;
+        }
+
+        #calculateBtn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: var(--accent-color);
+            color: var(--button-text-color);
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+        #downloadBtn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #27ae60;
+            color: var(--button-text-color);
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #calculateBtn:hover {
+            background-color: #e69500;
+        }
+        #downloadBtn:hover {
+            background-color: #229954;
+        }
+
+        .error-message {
+            color: var(--error-color);
+            background-color: #ffcdd2;
+            border: 1px solid var(--error-color);
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .results-card-title {
+            font-size: 1.5em;
+            color: var(--bg-main);
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .results-card-body {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .results-visual-column {
+            flex: 1 1 200px;
+            min-width: 180px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .results-info-column {
+            flex: 1.5 1 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .info-total-cabinets {
+            background-color: var(--accent-color);
+            color: var(--button-text-color);
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 1.1em;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .info-total-cabinets strong {
+            font-size: 1.3em;
+        }
+
+        .info-line {
+            font-size: 0.95em;
+        }
+        .info-line .label {
+            font-weight: bold;
+            color: #555;
+        }
+        .info-line .value {
+            color: var(--text-color-dark);
+        }
+        .info-line .px-value {
+            color: #777;
+            font-style: italic;
+            margin-left: 5px;
+        }
+
+        .cabinet-visual-area {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 10px auto;
+        }
+
+        .cabinet-box {
+            background-color: #e0e0e0;
+            border: 2px solid var(--text-color-dark);
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: var(--text-color-dark);
+            font-weight: bold;
+            padding: 3px;
+            overflow: hidden;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .cabinet-inside-text {
+            display: inline-block;
+            max-width: 98%;
+            max-height: 98%;
+            word-break: break-word;
+            line-height: 1.1;
+            font-size: 0.9em;
+        }
+
+        .cabinet-width-label, .cabinet-height-label {
+            position: absolute;
+            font-size: 0.8em;
+            color: var(--text-color-dark);
+            background-color: rgba(255,255,255,0.7);
+            padding: 0 2px;
+        }
+
+        .cabinet-width-label {
+            bottom: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .cabinet-height-label {
+            top: 50%;
+            right: -30px;
+            transform: translateY(-50%);
+        }
+        
+        #downloadableCardWrapper .cabinet-visual-area {
+            width: 200px;
+            height: 200px;
+        }
+
+        .card-attribution {
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8em;
+            color: #555;
+        }
+        .card-attribution a {
+            color: var(--bg-main);
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .card-attribution a:hover {
+            text-decoration: underline;
+        }
+
+        #downloadableCardWrapper {
+            position: fixed;
+            left: -9999px;
+            top: -9999px;
+            background-color: white;
+            padding: 30px;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 15px rgba(0,0,0,0.3);
+            width: 700px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-color-dark);
+        }
+
+        footer {
+            width: 100%;
+            max-width: 750px;
+        }
+        .watermark {
+            font-size: 0.9em;
+            color: var(--watermark-color);
+            text-align: center;
+            padding: 15px 0;
+        }
+        .watermark a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .watermark a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 700px) {
+            .results-card-body {
+                flex-direction: column;
+            }
+            .results-visual-column {
+                order: 1;
+                margin-bottom: 20px;
+            }
+            .results-info-column {
+                order: 2;
+            }
+        }
+         @media (max-width: 600px) {
+            body { padding: 10px; }
+            .card { padding: 20px; }
+            .form-group label { flex-basis: 100%; margin-bottom: 8px; }
+            .form-group input[type="number"], .form-group select { width: 100%; margin-right: 0; }
+            .form-group input[type="number"] { margin-bottom: 10px; }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>Calculadora de Gabinetes LED por Porta</h1>
+            <p class="tagline">Determine o máximo de gabinetes LED por saída da sending card.</p>
+        </header>
+
+        <div class="calculator-body">
+            <section class="input-section card">
+                <h2>Detalhes do Gabinete e Pixel Pitch</h2>
+                <div class="form-group">
+                    <label for="cabWidth">Largura do Gabinete:</label>
+                    <input type="number" id="cabWidth" value="500" step="any" min="1">
+                    <select id="cabWidthUnit">
+                        <option value="mm" selected>mm</option><option value="cm">cm</option><option value="m">m</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="cabHeight">Altura do Gabinete:</label>
+                    <input type="number" id="cabHeight" value="500" step="any" min="1">
+                    <select id="cabHeightUnit">
+                        <option value="mm" selected>mm</option><option value="cm">cm</option><option value="m">m</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="pixelPitch">Pixel Pitch (mm):</label>
+                    <input type="number" id="pixelPitch" value="3.91" step="any" min="0.1">
+                    <span> mm</span>
+                </div>
+                <div class="form-group">
+                    <label for="portCapacity">Capacidade de Pixels da Porta:</label>
+                    <input type="number" id="portCapacity" value="650000" step="1" min="1">
+                    <span> pixels</span>
+                </div>
+                <button id="calculateBtn">Calcular</button>
+                <div id="errorMessages" class="error-message" style="display:none;"></div>
+            </section>
+
+            <section id="resultsSection" class="card" style="display:none;">
+                <div class="results-card-content">
+                    <h2 class="results-card-title" id="mainResultsTitle">Visual do Gabinete : Resultado do Cálculo</h2>
+                    <div class="results-card-body">
+                        <div class="results-visual-column">
+                            <div class="cabinet-visual-area" id="mainCabinetVisualArea">
+                                <div class="cabinet-box" id="mainCabinetBox">
+                                    <span class="cabinet-inside-text" id="mainCabinetInsideText"></span>
+                                </div>
+                                <div class="cabinet-width-label" id="mainCabinetWidthLabel"></div>
+                                <div class="cabinet-height-label" id="mainCabinetHeightLabel"></div>
+                            </div>
+                        </div>
+                        <div class="results-info-column">
+                            <div class="info-total-cabinets"><span id="mainInfoTotalCabinets"></span></div>
+                            <div class="info-line"><span class="label">Largura do Gabinete:</span> <span class="value" id="mainInfoCabWidth"></span></div>
+                            <div class="info-line"><span class="label">Altura do Gabinete:</span> <span class="value" id="mainInfoCabHeight"></span></div>
+                            <div class="info-line"><span class="label">Pixel Pitch:</span> <span class="value" id="mainInfoPixelPitch"></span></div>
+                            <div class="info-line"><span class="label">Total de Pixels/Gabinete:</span> <span class="value" id="mainInfoTotalPixels"></span></div>
+                            <div class="info-line"><span class="label">Capacidade da Porta:</span> <span class="value" id="mainInfoPortCapacity"></span></div>
+                        </div>
+                    </div>
+                     <div class="card-attribution" style="border:none; padding-top:5px;">
+                        <span style="visibility:hidden;">placeholder</span>
+                        <span class="watermark" style="padding:0;">
+                            desenvolvido por <a href="https://www.instagram.com/mr_drawo" target="_blank">@mr_drawo</a>
+                        </span>
+                    </div>
+                </div>
+            </section>
+            
+            <div class="download-controls" id="downloadControlsContainer" style="display:none;">
+                <input type="text" id="customCardText" placeholder="Texto do Título (ex: Cliente/Gabine P3)">
+                <button id="downloadBtn">Baixar Card</button>
+            </div>
+
+        </div>
+    </div>
+
+    <footer>
+        <div class="watermark">
+            desenvolvido por <a href="https://www.instagram.com/mr_drawo" target="_blank">@mr_drawo</a>
+        </div>
+    </footer>
+
+    <div id="downloadableCardWrapper">
+        <div class="results-card-content" id="downloadableCardContent">
+            <h2 class="results-card-title" id="dlCardTitle">Visual do Gabinete : Texto Padrão</h2>
+            <div class="results-card-body">
+                <div class="results-visual-column">
+                     <div class="cabinet-visual-area" id="dlCabinetVisualArea">
+                        <div class="cabinet-box" id="dlCabinetBox">
+                            <span class="cabinet-inside-text" id="dlCabinetInsideText"></span>
+                        </div>
+                        <div class="cabinet-width-label" id="dlCabinetWidthLabel"></div>
+                        <div class="cabinet-height-label" id="dlCabinetHeightLabel"></div>
+                    </div>
+                </div>
+                <div class="results-info-column">
+                    <div class="info-total-cabinets"><span id="dlInfoTotalCabinets"></span></div>
+                    <div class="info-line"><span class="label">Largura do Gabinete:</span> <span class="value" id="dlInfoCabWidth"></span></div>
+                    <div class="info-line"><span class="label">Altura do Gabinete:</span> <span class="value" id="dlInfoCabHeight"></span></div>
+                    <div class="info-line"><span class="label">Pixel Pitch:</span> <span class="value" id="dlInfoPixelPitch"></span></div>
+                    <div class="info-line"><span class="label">Total de Pixels/Gabinete:</span> <span class="value" id="dlInfoTotalPixels"></span></div>
+                    <div class="info-line"><span class="label">Capacidade da Porta:</span> <span class="value" id="dlInfoPortCapacity"></span></div>
+                </div>
+            </div>
+            <div class="card-attribution">
+                <a href="https://gabriel-center.github.io/gabinete" target="_blank">gabriel-center.github.io/gabinete</a>
+                <a href="https://www.instagram.com/mr_drawo" target="_blank">desenvolvido por @mr_drawo</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const cabWidthInput = document.getElementById('cabWidth');
+        const cabWidthUnitInput = document.getElementById('cabWidthUnit');
+        const cabHeightInput = document.getElementById('cabHeight');
+        const cabHeightUnitInput = document.getElementById('cabHeightUnit');
+        const pixelPitchInput = document.getElementById('pixelPitch');
+        const portCapacityInput = document.getElementById('portCapacity');
+        const calculateBtn = document.getElementById('calculateBtn');
+        
+        const resultsSection = document.getElementById('resultsSection');
+        const errorMessagesDiv = document.getElementById('errorMessages');
+
+        const downloadControlsContainer = document.getElementById('downloadControlsContainer');
+        const customCardTextInput = document.getElementById('customCardText');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        const mainResultsTitle = document.getElementById('mainResultsTitle');
+        const mainCabinetVisualArea = document.getElementById('mainCabinetVisualArea');
+        const mainCabinetBox = document.getElementById('mainCabinetBox');
+        const mainCabinetInsideText = document.getElementById('mainCabinetInsideText');
+        const mainCabinetWidthLabel = document.getElementById('mainCabinetWidthLabel');
+        const mainCabinetHeightLabel = document.getElementById('mainCabinetHeightLabel');
+        const mainInfoTotalCabinets = document.getElementById('mainInfoTotalCabinets');
+        const mainInfoCabWidth = document.getElementById('mainInfoCabWidth');
+        const mainInfoCabHeight = document.getElementById('mainInfoCabHeight');
+        const mainInfoPixelPitch = document.getElementById('mainInfoPixelPitch');
+        const mainInfoTotalPixels = document.getElementById('mainInfoTotalPixels');
+        const mainInfoPortCapacity = document.getElementById('mainInfoPortCapacity');
+
+        const dlCardTitle = document.getElementById('dlCardTitle');
+        const dlCabinetVisualArea = document.getElementById('dlCabinetVisualArea');
+        const dlCabinetBox = document.getElementById('dlCabinetBox');
+        const dlCabinetInsideText = document.getElementById('dlCabinetInsideText');
+        const dlCabinetWidthLabel = document.getElementById('dlCabinetWidthLabel');
+        const dlCabinetHeightLabel = document.getElementById('dlCabinetHeightLabel');
+        const dlInfoTotalCabinets = document.getElementById('dlInfoTotalCabinets');
+        const dlInfoCabWidth = document.getElementById('dlInfoCabWidth');
+        const dlInfoCabHeight = document.getElementById('dlInfoCabHeight');
+        const dlInfoPixelPitch = document.getElementById('dlInfoPixelPitch');
+        const dlInfoTotalPixels = document.getElementById('dlInfoTotalPixels');
+        const dlInfoPortCapacity = document.getElementById('dlInfoPortCapacity');
+
+
+        function convertToMM(value, unit) {
+            if (unit === 'cm') return value * 10;
+            if (unit === 'm') return value * 1000;
+            return value;
+        }
+
+        function validateInputs(values) {
+            const errors = [];
+            if (values.cabWidth <= 0) errors.push("A Largura do Gabinete deve ser positiva.");
+            if (values.cabHeight <= 0) errors.push("A Altura do Gabinete deve ser positiva.");
+            if (values.pixelPitch <= 0) errors.push("O Pixel Pitch deve ser positivo.");
+            if (values.portCapacity <= 0) errors.push("A Capacidade da Porta deve ser positiva.");
+            return errors;
+        }
+
+        function scaleTextInBox(textElement, boxElement) {
+            let fontSize = Math.min(boxElement.clientWidth, boxElement.clientHeight) * 0.18;
+            fontSize = Math.max(6, Math.min(fontSize, 24));
+            textElement.style.fontSize = fontSize + 'px';
+            
+            let attempts = 0;
+            const maxAttempts = 30; 
+            while (
+                (textElement.scrollHeight > boxElement.clientHeight ||
+                 textElement.scrollWidth > boxElement.clientWidth) &&
+                fontSize > 5 && attempts < maxAttempts
+            ) {
+                fontSize -= 0.5;
+                textElement.style.fontSize = fontSize + 'px';
+                attempts++;
+            }
+        }
+
+        function updateVisualElements(targetElements, cabinetWidthMM, cabinetHeightMM, pixelWidth, pixelHeight, panelPixelResolution, maxVisualAreaDim = 180) {
+            const { visualArea, box, insideText, widthLabel, heightLabel } = targetElements;
+            let visBoxWidth, visBoxHeight;
+            const aspectRatio = cabinetWidthMM / cabinetHeightMM;
+
+            if (aspectRatio >= 1) {
+                visBoxWidth = maxVisualAreaDim;
+                visBoxHeight = maxVisualAreaDim / aspectRatio;
+            } else {
+                visBoxHeight = maxVisualAreaDim;
+                visBoxWidth = maxVisualAreaDim * aspectRatio;
+            }
+            visBoxWidth = Math.max(visBoxWidth, 50);
+            visBoxHeight = Math.max(visBoxHeight, 50);
+            visBoxWidth = Math.min(visBoxWidth, maxVisualAreaDim);
+            visBoxHeight = Math.min(visBoxHeight, maxVisualAreaDim);
+
+            box.style.width = `${visBoxWidth}px`;
+            box.style.height = `${visBoxHeight}px`;
+
+            insideText.textContent = `${panelPixelResolution.toLocaleString('pt-BR')} pixels`;
+            widthLabel.textContent = `${pixelWidth}px`;
+            heightLabel.textContent = `${pixelHeight}px`;
+            
+            scaleTextInBox(insideText, box);
+        }
+
+        function populateInfoText(targetElements, data) {
+            const { titleElement, customText, totalCabinetsEl, cabWidthEl, cabHeightEl, pixelPitchEl, totalPixelsEl, portCapacityEl } = targetElements;
+            const { cabinetWidthMM, cabinetHeightMM, pixelWidth, pixelHeight, pixelPitch, panelPixelResolution, portCapacity, maxCabinets } = data;
+
+            if (titleElement && customText !== undefined && customText.trim() !== "") {
+                titleElement.textContent = `Visual do Gabinete : ${customText}`;
+            } else if (titleElement) {
+                 titleElement.textContent = `Visual do Gabinete : Resultado do Cálculo`;
+            }
+
+            totalCabinetsEl.innerHTML = `Total de Gabinetes por Porta: <strong>${maxCabinets}</strong>`;
+            cabWidthEl.innerHTML = `${cabinetWidthMM.toFixed(2)} mm <span class="px-value">(${pixelWidth} px)</span>`;
+            cabHeightEl.innerHTML = `${cabinetHeightMM.toFixed(2)} mm <span class="px-value">(${pixelHeight} px)</span>`;
+            pixelPitchEl.textContent = `${pixelPitch.toFixed(2)} mm`;
+            totalPixelsEl.textContent = `${panelPixelResolution.toLocaleString('pt-BR')} pixels`;
+            portCapacityEl.textContent = `${portCapacity.toLocaleString('pt-BR')} pixels`;
+        }
+
+        calculateBtn.addEventListener('click', () => {
+            const cabWidthVal = parseFloat(cabWidthInput.value);
+            const cabWidthUnit = cabWidthUnitInput.value;
+            const cabHeightVal = parseFloat(cabHeightInput.value);
+            const cabHeightUnit = cabHeightUnitInput.value;
+            const pixelPitchVal = parseFloat(pixelPitchInput.value);
+            const portCapacityVal = parseInt(portCapacityInput.value, 10);
+
+            const validationErrors = validateInputs({ cabWidth: cabWidthVal, cabHeight: cabHeightVal, pixelPitch: pixelPitchVal, portCapacity: portCapacityVal });
+            if (validationErrors.length > 0) {
+                errorMessagesDiv.innerHTML = validationErrors.join('<br>');
+                errorMessagesDiv.style.display = 'block';
+                resultsSection.style.display = 'none';
+                downloadControlsContainer.style.display = 'none';
+                return;
+            }
+            errorMessagesDiv.style.display = 'none';
+            resultsSection.style.display = 'block';
+            downloadControlsContainer.style.display = 'flex';
+
+            const cabinetWidthMM = convertToMM(cabWidthVal, cabWidthUnit);
+            const cabinetHeightMM = convertToMM(cabHeightVal, cabHeightUnit);
+            const rawPixelWidth = cabinetWidthMM / pixelPitchVal;
+            const rawPixelHeight = cabinetHeightMM / pixelPitchVal;
+            const pixelWidth = Math.round(rawPixelWidth);
+            const pixelHeight = Math.round(rawPixelHeight);
+
+            if (pixelWidth === 0 || pixelHeight === 0) {
+                 errorMessagesDiv.innerHTML = "A largura ou altura de pixels calculada é zero. Verifique os dados.";
+                 errorMessagesDiv.style.display = 'block';
+                 resultsSection.style.display = 'none';
+                 downloadControlsContainer.style.display = 'none';
+                 return;
+            }
+            const panelPixelResolution = pixelWidth * pixelHeight;
+            const maxCabinetsRaw = portCapacityVal / panelPixelResolution;
+            const maxCabinets = Math.floor(maxCabinetsRaw);
+
+            const calculatedData = {
+                cabinetWidthMM, cabinetHeightMM, pixelWidth, pixelHeight, 
+                pixelPitch: pixelPitchVal, panelPixelResolution, portCapacity: portCapacityVal, maxCabinets
+            };
+
+            populateInfoText({
+                titleElement: mainResultsTitle,
+                customText: customCardTextInput.value,
+                totalCabinetsEl: mainInfoTotalCabinets,
+                cabWidthEl: mainInfoCabWidth, cabHeightEl: mainInfoCabHeight,
+                pixelPitchEl: mainInfoPixelPitch, totalPixelsEl: mainInfoTotalPixels,
+                portCapacityEl: mainInfoPortCapacity
+            }, calculatedData);
+
+            updateVisualElements({
+                visualArea: mainCabinetVisualArea, box: mainCabinetBox,
+                insideText: mainCabinetInsideText, widthLabel: mainCabinetWidthLabel,
+                heightLabel: mainCabinetHeightLabel
+            }, cabinetWidthMM, cabinetHeightMM, pixelWidth, pixelHeight, panelPixelResolution, 160);
+            
+            downloadBtn.dataset.calculatedData = JSON.stringify(calculatedData);
+        });
+
+        downloadBtn.addEventListener('click', () => {
+            const customText = customCardTextInput.value.trim() || "Resumo"; // Default text if input is empty
+            const calculatedData = JSON.parse(downloadBtn.dataset.calculatedData || "{}");
+
+            if (!calculatedData.pixelWidth) {
+                alert("Por favor, calcule primeiro ou verifique se os dados estão disponíveis.");
+                return;
+            }
+
+            populateInfoText({
+                titleElement: dlCardTitle, customText: customText,
+                totalCabinetsEl: dlInfoTotalCabinets,
+                cabWidthEl: dlInfoCabWidth, cabHeightEl: dlInfoCabHeight,
+                pixelPitchEl: dlInfoPixelPitch, totalPixelsEl: dlInfoTotalPixels,
+                portCapacityEl: dlInfoPortCapacity
+            }, calculatedData);
+            
+            updateVisualElements({
+                visualArea: dlCabinetVisualArea, box: dlCabinetBox,
+                insideText: dlCabinetInsideText, widthLabel: dlCabinetWidthLabel,
+                heightLabel: dlCabinetHeightLabel
+            }, calculatedData.cabinetWidthMM, calculatedData.cabinetHeightMM, 
+               calculatedData.pixelWidth, calculatedData.pixelHeight, calculatedData.panelPixelResolution, 180);
+
+            const cardToDownload = document.getElementById('downloadableCardWrapper');
+            
+            html2canvas(cardToDownload, { 
+                scale: 2, 
+                useCORS: true,
+                logging: false,
+                backgroundColor: "#ffffff"
+            }).then(canvas => {
+                const link = document.createElement('a');
+                const fileName = customText.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                link.download = `${fileName}_calc_led.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            }).catch(err => {
+                console.error("Erro ao gerar imagem do card:", err);
+                alert("Desculpe, ocorreu um erro ao gerar o card para download.");
+            });
+        });
+
+    </script>
+</body>
+</html>
